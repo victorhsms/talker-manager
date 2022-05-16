@@ -9,7 +9,7 @@ const {
 const app = express();
 app.use(bodyParser.json());
 
-const { readJson } = require('./utils/index');
+const { readJson, writeJson } = require('./utils/index');
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
@@ -43,7 +43,21 @@ app.post('/login', validationsLogin, (request, response) => {
   response.status(200).json({ token: hash });
 });
 
-app.post('/talker', authenticated, (request, response) => response.status(201));
+app.post('/talker', authenticated, async (request, response) => {
+  response.status(201);
+});
+
+app.delete('/talker/:id', authenticated, async (request, response) => {
+  const { id } = request.params;
+
+  const talkers = await JSON.parse(readJson());
+  const talkerIndex = talkers.findIndex((talker) => talker.id === parseInt(id, 10));
+  console.log(talkerIndex);
+  talkers.splice(talkerIndex, 1);
+  console.log(talkers);
+  writeJson(JSON.stringify(talkers));
+  response.status(204).send();
+});
 
 app.listen(PORT, () => {
   console.log('Online');
