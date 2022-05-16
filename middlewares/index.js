@@ -1,5 +1,5 @@
-const error = require('./src/error');
+const validations = require('./src/validations');
 
 module.exports = {
-  error,
+  validations,
 };
