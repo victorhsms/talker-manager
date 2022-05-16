@@ -4,4 +4,6 @@ const fs = require('fs');
 
 const readJson = () => fs.readFileSync('./talker.json', 'utf-8', (error, data) => data);
 
-module.exports = { readJson };
+const writeJson = (data) => fs.writeFileSync('./talker.json', data);
+
+module.exports = { readJson, writeJson };

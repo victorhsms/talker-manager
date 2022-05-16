@@ -1,7 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cryptoJs = require('crypto');
-const { validations } = require('./middlewares/index');
+const {
+  validationsLogin,
+  authenticated, 
+} = require('./middlewares/index');
 
 const app = express();
 app.use(bodyParser.json());
@@ -33,12 +36,14 @@ app.get('/talker/:id', async (request, response) => {
   response.status(200).json(talkers[talkerIndex]);
 });
 
-app.post('/login', validations, (request, response) => {
+app.post('/login', validationsLogin, (request, response) => {
   // aprendi a fazer isso pelo site: https://www.geeksforgeeks.org/node-js-crypto-randombytes-method/
   const hash = cryptoJs.randomBytes(8).toString('hex');
-
+  
   response.status(200).json({ token: hash });
 });
+
+app.post('/talker', authenticated, (request, response) => response.status(201));
 
 app.listen(PORT, () => {
   console.log('Online');

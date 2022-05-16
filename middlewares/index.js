@@ -1,5 +1,7 @@
-const validations = require('./src/validations');
+const validationsLogin = require('./src/validationsLogin');
+const authenticated = require('./src/authenticated');
 
 module.exports = {
-  validations,
+  validationsLogin,
+  authenticated,
 };
