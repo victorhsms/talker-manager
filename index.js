@@ -5,6 +5,10 @@ const {
   validationsLogin,
   authenticated, 
   error,
+  validateName,
+  validateAge,
+  validateTalker,
+  validateRateAndWatched,
 } = require('./middlewares/index');
 
 const app = express();
@@ -45,9 +49,26 @@ app.post('/login', validationsLogin, (request, response, next) => {
   next();
 });
 
-app.post('/talker', authenticated, async (request, response) => {
-  response.status(201);
-});
+app.post(
+  '/talker',
+  authenticated,
+  validateName,
+  validateAge,
+  validateTalker,
+  validateRateAndWatched,
+  async (request, response) => {
+  const { body: talker } = request;
+  
+  const talkers = await JSON.parse(readJson());
+  const newTalker = {
+    id: talkers[talkers.length - 1].id + 1,
+    ...talker,
+  };
+  talkers.push(newTalker);
+  writeJson(JSON.stringify(talkers));
+  response.status(201).json(newTalker);
+},
+);
 
 app.delete('/talker/:id', authenticated, async (request, response, next) => {
   const { id } = request.params;
