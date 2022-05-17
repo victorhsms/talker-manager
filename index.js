@@ -4,7 +4,6 @@ const cryptoJs = require('crypto');
 const {
   validationsLogin,
   authenticated, 
-  error,
   validateName,
   validateAge,
   validateTalker,
@@ -108,8 +107,6 @@ app.delete('/talker/:id', authenticated, async (request, response) => {
   writeJson(JSON.stringify(talkers));
   return response.status(204).send();
 });
-
-app.use(error);
 
 app.listen(PORT, () => {
   console.log('Online');
