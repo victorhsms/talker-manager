@@ -9,5 +9,5 @@ module.exports = (request, response, next) => {
     });
   }
 
-  next();
+  return next();
 };

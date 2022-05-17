@@ -23,15 +23,12 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-app.get('/talker', async (request, response) => {
-  const json = await JSON.parse(readJson());
-  return response.status(200).json(json);
-});
+app.get('/talker', async (request, response) => response.status(200).json(await readJson()));
 
 app.get('/talker/search', authenticated, async (request, response) => {
   const { q } = request.query;
 
-  const talkers = await JSON.parse(readJson());
+  const talkers = await readJson();
   if (!q) return response.status(200).json(talkers);
 
   const talkerTarget = talkers.filter((talker) => talker.name.includes(q));
@@ -42,7 +39,7 @@ app.get('/talker/search', authenticated, async (request, response) => {
 app.get('/talker/:id', async (request, response) => {
   const { id } = request.params;
 
-  const talkers = await JSON.parse(readJson());
+  const talkers = await readJson();
   const talkerIndex = talkers.findIndex((talker) => talker.id === parseInt(id, 10));
   if (talkerIndex === -1) {
     return response.status(404).json({ message: 'Pessoa palestrante não encontrada' });
@@ -68,13 +65,13 @@ app.post(
   async (request, response) => {
   const { body: talker } = request;
   
-  const talkers = await JSON.parse(readJson());
+  const talkers = await readJson();
   const newTalker = {
     id: talkers[talkers.length - 1].id + 1,
     ...talker,
   };
   talkers.push(newTalker);
-  writeJson(JSON.stringify(talkers));
+  await writeJson(talkers);
   return response.status(201).json(newTalker);
 },
 );
@@ -89,11 +86,11 @@ app.put(
   async (request, response) => {
   const { body } = request;
   const { id } = request.params;
-  const talkers = await JSON.parse(readJson());
+  const talkers = await readJson();
   const talkerIndex = talkers.findIndex((talker) => talker.id === Number(id));
   const newTalker = { id: talkerIndex + 1, ...body };
   talkers.splice(talkerIndex, 1, newTalker);
-  writeJson(JSON.stringify(talkers));
+  await writeJson(talkers);
   return response.status(200).json(newTalker);
 },
 );
@@ -101,10 +98,10 @@ app.put(
 app.delete('/talker/:id', authenticated, async (request, response) => {
   const { id } = request.params;
 
-  const talkers = await JSON.parse(readJson());
+  const talkers = await readJson();
   const talkerIndex = talkers.findIndex((talker) => talker.id === parseInt(id, 10));
   talkers.splice(talkerIndex, 1);
-  writeJson(JSON.stringify(talkers));
+  await writeJson(talkers);
   return response.status(204).send();
 });
 

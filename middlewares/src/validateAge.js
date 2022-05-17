@@ -9,5 +9,5 @@ module.exports = (request, response, next) => {
     return response.status(400).json({ message: 'A pessoa palestrante deve ser maior de idade' });
   }
 
-  next();
+  return next();
 };
