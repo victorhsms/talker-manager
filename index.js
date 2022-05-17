@@ -26,8 +26,19 @@ app.get('/', (_request, response) => {
 
 app.get('/talker', async (request, response) => {
   const json = await JSON.parse(readJson());
-  response.status(200).json(json);
+  return response.status(200).json(json);
 });
+
+app.get('/talker/search', authenticated, async (request, response) => {
+  const { q } = request.query;
+
+  const talkers = await JSON.parse(readJson());
+  if (!q) return response.status(200).json(talkers);
+
+  const talkerTarget = talkers.filter((talker) => talker.name.includes(q));
+
+  return response.status(200).json(talkerTarget);
+}); 
 
 app.get('/talker/:id', async (request, response) => {
   const { id } = request.params;
@@ -38,15 +49,14 @@ app.get('/talker/:id', async (request, response) => {
     return response.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   } 
 
-  response.status(200).json(talkers[talkerIndex]);
+  return response.status(200).json(talkers[talkerIndex]);
 });
 
-app.post('/login', validationsLogin, (request, response, next) => {
+app.post('/login', validationsLogin, (request, response) => {
   // aprendi a fazer isso pelo site: https://www.geeksforgeeks.org/node-js-crypto-randombytes-method/
   const hash = cryptoJs.randomBytes(8).toString('hex');
   
-  response.status(200).json({ token: hash });
-  next();
+  return response.status(200).json({ token: hash });
 });
 
 app.post(
@@ -66,19 +76,37 @@ app.post(
   };
   talkers.push(newTalker);
   writeJson(JSON.stringify(talkers));
-  response.status(201).json(newTalker);
+  return response.status(201).json(newTalker);
 },
 );
 
-app.delete('/talker/:id', authenticated, async (request, response, next) => {
+app.put(
+  '/talker/:id',
+  authenticated,
+  validateName,
+  validateAge,
+  validateTalker,
+  validateRateAndWatched,
+  async (request, response) => {
+  const { body } = request;
+  const { id } = request.params;
+  const talkers = await JSON.parse(readJson());
+  const talkerIndex = talkers.findIndex((talker) => talker.id === Number(id));
+  const newTalker = { id: talkerIndex + 1, ...body };
+  talkers.splice(talkerIndex, 1, newTalker);
+  writeJson(JSON.stringify(talkers));
+  return response.status(200).json(newTalker);
+},
+);
+
+app.delete('/talker/:id', authenticated, async (request, response) => {
   const { id } = request.params;
 
   const talkers = await JSON.parse(readJson());
   const talkerIndex = talkers.findIndex((talker) => talker.id === parseInt(id, 10));
   talkers.splice(talkerIndex, 1);
   writeJson(JSON.stringify(talkers));
-  response.status(204).send();
-  next();
+  return response.status(204).send();
 });
 
 app.use(error);
