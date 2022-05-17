@@ -4,6 +4,7 @@ const cryptoJs = require('crypto');
 const {
   validationsLogin,
   authenticated, 
+  error,
 } = require('./middlewares/index');
 
 const app = express();
@@ -36,28 +37,30 @@ app.get('/talker/:id', async (request, response) => {
   response.status(200).json(talkers[talkerIndex]);
 });
 
-app.post('/login', validationsLogin, (request, response) => {
+app.post('/login', validationsLogin, (request, response, next) => {
   // aprendi a fazer isso pelo site: https://www.geeksforgeeks.org/node-js-crypto-randombytes-method/
   const hash = cryptoJs.randomBytes(8).toString('hex');
   
   response.status(200).json({ token: hash });
+  next();
 });
 
 app.post('/talker', authenticated, async (request, response) => {
   response.status(201);
 });
 
-app.delete('/talker/:id', authenticated, async (request, response) => {
+app.delete('/talker/:id', authenticated, async (request, response, next) => {
   const { id } = request.params;
 
   const talkers = await JSON.parse(readJson());
   const talkerIndex = talkers.findIndex((talker) => talker.id === parseInt(id, 10));
-  console.log(talkerIndex);
   talkers.splice(talkerIndex, 1);
-  console.log(talkers);
   writeJson(JSON.stringify(talkers));
   response.status(204).send();
+  next();
 });
+
+app.use(error);
 
 app.listen(PORT, () => {
   console.log('Online');
